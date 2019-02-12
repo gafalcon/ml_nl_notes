@@ -1,0 +1,286 @@
+
+* Natural Language Processing
+** Preprocessing
+  - Remove irrelevant characters such as non alphanumeric chars.
+  - Tokenize text
+  - Remove words not relevant, such as "@" or urls
+  - Convert to lowercase
+  - Consider combining misspelled or alternately spelled words as single representation
+  - Lemmatize
+** Word Representations
+*** Bag of words
+    Completely ignores order of words
+    #+ATTR_ORG: :width 500
+     [[./ml_images/bag_of_words.png]]
+
+    - sklearn: CountVectorizer(tokenizer, grams)
+*** TF-IDF (Term Frequency, Inverse Document Frequency)
+    weighs words by how rare they are in our dataset, discounting words that are too frequent and just add to the noise
+*** Embeddings
+     - Function *W* that maps words to high-dimensional vectors. Usually is just a lookup table
+     - W is initialized to have random vecs for each words. It learns meaningful vectors in order to perform some task
+     - Example: predict valid 5-grams (sequences of 5 words). The model will run each word in the 5-gram through W to get a vector representing it and feed those into a module *R* that predicts its validity. For this predictions, the net needs to learn good params for *W* and *R*. The interesting part is *W*.
+     - words with similar meanings have similar vectors. allows us to generalize from one sentence to a class of similar senteces.
+     - analogies between words seem to be encoded in the difference vectors between words. Ex: male-female difference vectors:
+       W(woman) - W(man) approx eq W(aunt) - W(uncle)
+       W(woman) - W(man) approx eq W(queen) - W(king).
+       Theres probably a gender dimension, same thing for singular vs plural, and more sophisticated relationships.
+     - NN learn better ways to represent data automatically. Embeddings is an example.
+     - Can also be used to deal with the sparse matrix problem in recommender systems.
+*** t-SNE
+     For visualizing high-dimensional data. Words with similar meanings are close together.
+     t-Distributed Stochastic Neighbor Embedding (t-SNE) is a (prize-winning) technique for dimensionality reduction that is particularly well suited for the visualization of high-dimensional datasets. The technique can be implemented via Barnes-Hut approximations, allowing it to be applied on large real-world datasets
+*** word2vec
+     unsupervised learning algo used for producing word embeddings. Two ways to implement it:
+     1. CBOW (Continuous Bag of Words): have a window around a target word and consider words around it (its context). Supply these words as input into our net and use it to try to predict the target word.
+     2. Skip-gram. Have a target word and try to predict the words in the window arount it. Predict the context around a word. Given a specific word in middle of sentence, look at the words nearby and pick one at random. The netword is going to tell us the probability for every word in out vocabulary of being the "nearby word" that we chose.
+        Feed word pairs. The network is going to learn statistics from the number of times each pairing shows up.
+        The nn does not know anything about the offset of the output word relative to the input word. It does not learn a different set of probs for the word before the input vs the word after.
+        If two diff words have very similar "context" (words around them), our model outputs similar results for these two words.
+        
+        #+ATTR_ORG: :width 300
+        [[./imgs/nlp/max_word2vec.png]]
+        
+        Replacing with negative log likelihood
+
+        #+ATTR_ORG: :width 300
+        [[./imgs/nlp/nll_word2vec.png]]
+
+        Transformed to proper loss function:
+
+        #+ATTR_ORG: :width 300
+        [[./imgs/nlp/loss_fun_word2vec.png]]
+
+        where *P* is
+
+        #+ATTR_ORG: :width 300
+        [[./imgs/nlp/p_word2vec.png]]
+
+        For each existing center, context pair in corpus we’re computing their “similarity score”. And divide it by sum of each theoretically possible context — to know whether score is relatively high or low. As softmax is guaranteed to take a value between 0 and 1 it defines a valid probability distribution.
+
+     Input words are passed as one-hot vectors. Hidden-layer of linear units, then into softmax layer to make predictions. Train the hidden layer weight matrix to find efficient representations for our words. This is the *embedding* matrix. The hidden layer just operates as a lookup table. Its output is just the "word vector" for the input word.
+     
+     [[./imgs/nlp/skip_gram_net_arch.png]]
+
+     In esence, it uses two embedding matrices, the first to lookup the center word vector, and this one is multiplied to the other embedding matrix of the context word vecs, which is like making a dot product between the center word vec to all the context word vecs, the highest dot product represents the most similar word, part of its context.
+     [[./imgs/nlp/skip-gram-architecture.png]]
+
+     The embedding matrix has a size of the num of words by the num of neurons in the hidden layer (embed size).
+     The embed size is much smaller than the number of unique words. its a trade-off: more features->extra computation and longer run times, but allow more subtle representations, and better models.
+
+     [[http://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/][word2vec tutorial-skip gram]]
+     [[http://mccormickml.com/2017/01/11/word2vec-tutorial-part-2-negative-sampling/][negative_sampling word2vec]]
+***** training
+      use altered version of softmax for the loss. sample n number of negative softmax units from full set and calculate the loss only with them. (tf.nn.sampled_softmax_loss). Cuz the vocabulary can be very large.
+      Adagrad instead of SGD, cuz works better when lot of variables to optimize.
+     
+*** GloVe.
+     /See lecture 3 of Stanford NLP course/
+
+     GloVe, coined from Global Vectors, is a model for distributed word representation. The model is an unsupervised learning algorithm for obtaining vector representations for words. Training is performed on aggregated global word-word co-occurrence statistics from a corpus, and the resulting representations showcase interesting linear substructures of the word vector space.
+
+     Creates embeddings by accumulating counts of co-occurrences.
+     Count-based models learn their vectors by essentially doing dimensionality reduction on the co-occurrence counts matrix. They first construct a large matrix of (words x context) co-occurrence information, i.e. for each "word" (the rows), you count how frequently we see this word in some "context" (the columns) in a large corpus.  The number of "contexts" is of course large, since it is essentially combinatorial in size. So then they factorize this matrix to yield a lower-dimensional (word x features) matrix, where each row now yields a vector representation for each word. In general, this is done by minimizing a "reconstruction loss" which tries to find the lower-dimensional representations which can explain most of the variance in the high-dimensional data. In the specific case of GloVe, the counts matrix is preprocessed by normalizing the counts and log-smoothing them. This turns out to be A Good Thing in terms of the quality of the learned representations.
+
+     However, as pointed out, when we control for all the training hyper-parameters, the embeddings generated using the two methods tend to perform very similarly in downstream NLP tasks. The additional benefits of GloVe over word2vec is that it is easier to parallelize the implementation which means it's easier to train over more data     
+     https://www.quora.com/How-is-GloVe-different-from-word2vec
+
+
+     
+***** Intuition
+      The main intuition underlying the model is the simple observation that ratios of word-word co-occurrence probabilities have the potential for encoding some form of meaning. For example, consider the co-occurrence probabilities for target words ice and steam with various probe words from the vocabulary. Here are some actual probabilities from a 6 billion word corpus:
+
+      [[./imgs/nlp/glove_table.png]]
+
+      As one might expect, ice co-occurs more frequently with solid than it does with gas, whereas steam co-occurs more frequently with gas than it does with solid. Both words co-occur with their shared property water frequently, and both co-occur with the unrelated word fashion infrequently. Only in the ratio of probabilities does noise from non-discriminative words like water and fashion cancel out, so that large values (much greater than 1) correlate well with properties specific to ice, and small values (much less than 1) correlate well with properties specific of steam. In this way, the ratio of probabilities encodes some crude form of meaning associated with the abstract concept of thermodynamic phase.
+
+      The training objective of GloVe is to learn word vectors such that their dot product equals the logarithm of the words' probability of co-occurrence. Owing to the fact that the logarithm of a ratio equals the difference of logarithms, this objective associates (the logarithm of) ratios of co-occurrence probabilities with vector differences in the word vector space. Because these ratios can encode some form of meaning, this information gets encoded as vector differences as well. For this reason, the resulting word vectors perform very well on word analogy tasks.
+
+      [[./imgs/nlp/glove_loss_function.png]]
+      
+      *P_{ij}* is the count of how often word  i appears in context of word j. *P* is the co-occurrence matrix. *f* is a weighting function which help us to prevent learning only from extremely common word pairs. 
+
+      http://text2vec.org/glove.html
+
+***** Matrix Factorization
+      The idea then is to apply matrix factorization to approximate this matrix as depicted in the following figure.
+
+      [[./imgs/nlp/glove_matrix_factorization.png]]
+
+      Considering the Word-Context (WC) matrix, Word-Feature (WF) matrix and Feature-Context (FC) matrix, we try to factorize WC = WF x FC, such that we we aim to reconstruct WC from WF and FC by multiplying them. For this, we typically initialize WF and FC with some random weights and attempt to multiply them to get WC’ (an approximation of WC) and measure how close it is to WC. We do this multiple times using Stochastic Gradient Descent (SGD) to minimize the error. Finally, the Word-Feature matrix (WF) gives us the word embeddings for each word where F can be preset to a specific number of dimensions. 
+      https://www.kdnuggets.com/2018/04/implementing-deep-learning-methods-feature-engineering-text-data-glove.html
+
+***** Hyperparameters
+      - Dimension: best ~300, slight drop-off afterwards
+      - Window size: around 8 each center word
+
+        
+*** FastText
+     Fasttext (which is essentially an extension of word2vec model), treats each word as composed of character ngrams. So the vector for a word is made of the sum of this character n grams.
+     At each training step in FastText, the mean of the target word vector and its component n-gram vectors are used for training. The adjustment that is calculated from the error is then used uniformly to update each of the vectors that were combined to form the target. This adds a lot of additional computation to the training step. At each point, a word needs to sum and average its n-gram component parts. The trade-off is a set of word-vectors that contain embedded sub-word information. These vectors have been shown to be more accurate than Word2Vec vectors by a number of different measures
+     - Generate better word embeddings for rare words ( even if words are rare their character n grams are still shared with other words - hence the embeddings can still be good).
+     - Out of vocabulary words - they can construct the vector for a word from its character n grams even if word doesn't appear in training corpus. Both Word2vec and Glove can't.
+     - since the training is at character n-gram level, it takes longer to generate fasttext embeddings compared to word2vec 
+     - As the corpus size grows, the memory requirement grows too - the number of ngrams that get hashed into the same ngram bucket would grow.
+     - The usage of character embeddings (individual characters as opposed to n-grams) for downstream tasks have recently shown to boost the performance of those tasks compared to using word embeddings like word2vec or Glove.
+      
+*** Preprocessing when using pretrained embeddings 
+     - [[https://www.kaggle.com/christofhenkel/how-to-preprocessing-when-using-embeddings]]
+** Neural Networks for NLP
+*** Recurrent Neural Networks
+    [[./rnn.org]]
+***** TODO Examples (CODE)
+*** Convolutional Neural Networks
+     A convolutional neural network for text only operates in two dimensions, with the filters only needing to be moved along the temporal dimension.
+
+     #+ATTR_ORG: :width 500
+     [[./imgs/nlp/cnn_for_nlp.png]]
+
+     CNNs are very fast. Compared to something like n-grams, CNNs are also /efficient/ in terms of representation. Conv filters learn good representations automatically, without needing to represent the whole vocab.
+     They are more parallelizable than RNNs, as the state at every timestep only depends on the local context (via the convolution operation) rather than all past states as in the RNN. CNNs can be extended with wider receptive fields using dilated convolutions to capture a wider context (Kalchbrenner et al., 2016). CNNs and LSTMs can also be combined and stacked
+     and convolutions can be used to speed up an LSTM.
+***** How to apply CNN to NLP
+      [[http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/][Understanding CCN for NLP]]
+      Each row is a vector that represents a word(Word embeddings). In NLP we use filters that slide over full rows of the matrix(words). The "width" of filters is the same as the width of the input matrix. The height, varies, but sliding windows over 2-5 words at a time is typical.
+
+     #+ATTR_ORG: :width 600
+      [[./imgs/nlp/cnn.png]]
+
+      Location Invariance and local Compositionality made intuitive sense for imgs, but not so much for NLP.  You probably do care a lot where in the sentence a word appears. Pixels close to each other are likely to be semantically related (part of the same object), but the same isn’t always true for words. In many languages, parts of phrases could be separated by several other words. The compositional aspect isn’t obvious either. Clearly, words compose in some ways, like an adjective modifying a noun, but how exactly this works what higher level representations actually “mean” isn’t as obvious as in the Computer Vision case.
+
+      In NLP you could imagine having various channels: Have separate channels for different word embeddings, or have a channel for the same sentence represented in different languages, or phrased in different ways.
+****** Applications
+       - The most is for classification tasks: Sentiment Analysis, Spam Detection or Topic Categorization. Convs and pooling lose info about local order of words, so that sequence tagging as in PoS Tagging or Entity Extraction is harder to fit into a pure CNN arch.
+       - [[http://arxiv.org/abs/1510.03820][Sensitive Analysis of CNNs for Sentence Classification]] performs an empirical evaluation on the effect of varying hyperparameters in CNN archs, investigating performance and variance over multiple runs. For text classification, the results of this paper as a starting point would be an excellent idea. Max-pooling always beat average pooling, the ideal filter sizes are important but task-dependent, and regularization doesn’t make a big different in the NLP tasks considered. A caveat is that all the datasets were quite similar in terms of their document length, so the same guidelines may not apply to data that looks considerably different.
+       - Most CNN archs learn embeddings for words and sentences as part of their training procedure.
+       - There has also been research in applying CNNs directly to characters. Results show that learning directly from char level input works well on large datasets(millions of ex), but underperforms simpler models on smaller datasets(hundreds of thousands of examples).
+
+***** Examples (CODE) 
+      - [[http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/][Implementing a CNN for text-classification]]
+      - Notebooks:
+        - [[./notebooks/nlp/CNN_text_classification.ipynb]]
+        - [[./notebooks/nlp/CNN_text_classification_keras.ipynb]]
+      
+*** TODO Recursive Neural Networks
+     language is inherently hierarchical. Words are composed into higher-order phrases and clauses. Treating sentences as trees rather than as a sequence gives rise to recursive neural networks
+
+     #+ATTR_ORG: :width 400
+     [[./imgs/nlp/recursive_nn.png]]
+     
+
+     At every node of the tree, a new representation is computed by composing the representations of the child nodes. As a tree can also be seen as imposing a different processing order on an RNN, LSTMs have naturally been extended to trees 
+***** Examples (CODE)
+
+** TODO Seq2Seq (2014)
+    General framework for mapping one sequence to another one using a neural network. In the framework, an encoder neural network process a sentence symbol by symbol and compresses it into a vector representation; a decoder neural network then predicts the output symbol by symbol based on the encoder state, taking as input at every step the previously predicted symbol 
+
+     #+ATTR_ORG: :width 500
+    [[./imgs/nlp/seq2seq.png]]
+
+    This framework due to its flexibility is now the go-to framework for natural language generation tasks, with different models taking on the role of the encoder and the decoder. 
+
+    
+**** TODO Examples (CODE)
+
+** TODO Attention
+    The main bottleneck of sequence-to-sequence learning is that it requires to compress the entire content of the source sequence into a fixed-size vector. Attention alleviates this by allowing the decoder to look back at the source sequence hidden states, which are then provided as a weighted average as additional input to the decoder
+    
+     #+ATTR_ORG: :width 300
+    [[./imgs/nlp/attention.png]]
+    
+    Attention is widely applicable and potentially useful for any task that requires making decisions based on certain parts of the input.
+    Attention is also not restricted to just looking at the input sequence; self-attention can be used to look at the surrounding words in a sentence or document to obtain more contextually sensitive word representations. 
+**** TODO Examples (CODE)
+     - https://www.kaggle.com/gafalcon/using-lstms-with-attention-for-emotion-recognition/notebook
+** TODO Charnn
+** TODO Language Modelling
+** Memory Based Networks (2015)
+    Attention can be seen as a form of fuzzy memory where the memory consists of the past hidden states of the model, with the model choosing what to retrieve from memory.  Many models with a more explicit memory have been proposed. 
+    Memory is often accessed based on similarity to the current state similar to attention and can typically be written to and read from. Models differ in how they implement and leverage the memory. For instance, End-to-end Memory Networks process the input multiple times and update the memory to enable multiple steps of inference. Neural Turing Machines also have a location-based addressing, which allows them to learn simple computer programs like sorting. Memory-based models are typically applied to tasks, where retaining information over longer time spans should be useful such as language modelling and reading comprehension. The concept of a memory is very versatile: A knowledge base or table can function as a memory, while a memory can also be populated based on the entire input or particular parts of it.
+
+** Pretrained language models (2018)
+    language models only require unlabelled text; training can thus scale to billions of tokens, new domains, and new languages.Beneficial across a diverse range of tasks. Pretrained language models have been shown enable learning with significantly less data. As language models only require unlabelled data, they are particularly beneficial for low-resource languages where labelled data is scarce.  
+
+** Machine Translation
+
+** Best Practices
+    [[http://ruder.io/deep-learning-nlp-best-practices/index.html][Deep learning best practices]]
+***  Word embeddings
+    The dimensionality is task-dependent: a smaller dimensionality better for more syntactic tasks such as named entity recognition or part-of-speech (POS) tagging, while a larger dim is more useful for more semantic tasks such as sentiment analysis.
+*** Depth
+     State-of-the-art approaches now regularly use deep Bi-LSTMs, typically consisting of 3-4 layers, e.g. for POS tagging and semantic role labelling. Performance improvements of making the model deeper than 2 layers are minimal. These observations hold for most sequence tagging and structured prediction problems. For classification, deep or very deep models perform well only with character-level input and shallow word-level models are still the state-of-the-art
+*** Layer connections
+***** Highway layers (2015)
+      A one-layer MLP applies an affine transformation followed by a non-linearity g to its input x. 
+      A *highway layer* computes the following function instead:
+
+      [[./imgs/nlp/h_mlp.png]]
+
+      *t* is the /transform/ gate and (1 - *t*) is the /carry/ gate. Highway layers are similar to gates of LSTM. They adaptively /carry/ some dimensions of the input directly to the output.
+      
+      [[./imgs/nlp/h_highway.png]]
+
+      [[./imgs/nlp/t_highway.png]]
+      SoA results in language modelling. Also used for speech recognition.
+
+
+***** Residual connections (2016)
+      Adds input of current layer to its output via a short-cut connection. Mitigates vanishing gradient problem.
+***** Dense connections (2017)
+      Adds direct connections from each layer to all subsequent layers. Succesfully used in computer vision. Also useful for Multi-Task Learning of diff NLP tasks.
+
+*** Dropout (2014)
+     Still the go-to regularizer for NLP. Dropout of 0.5 shown effective for most cases. (Adaptive dropout and evolutional dropout not wide adopted). The main problem is that it could not be applied to recurrent connections, as the aggregating dropout masks would effectively zero out embeddings over time.
+***** Recurrent dropout
+      Applying same dropout across timesteps at layer /l/. 
+      SoA results in semantic role labelling and language modelling(2017).
+
+*** Multi-task learning
+*****  Auxiliary objectives.
+      Find auxiliary objectives that are useful for the task we care about.
+***** Task-specific layers.
+      Allow the model to learn task-specific layers. Placing the output layer of one task at a lower level. 
+*** TODO Attention
+*** Optimization
+     - Adam most popular for NLP. Converges much faster, but SGD with learning rate annealing or with properly tuned momentum outperforms Adam.
+     - We can perform learning rate annealing with restarts: set a lr and train model until convergence. Then, halve lr and restart by loading previous best model. Adam with 2 restarts and learning rate annealing is faster and performs better than SGD with annealing.
+*** Emsembling
+     Prefer to ensemble multiple independently trained models to maximize model diversity.
+*** Hyperparameter optimization
+     Bayesian Optimization ideal tool for black-box optimization of hyperparams.
+*** LSTM tricks
+***** Learning initial state
+      Instead of fixing the initial state, we can learn it like any other parameter.
+***** Tying input and output embeddings
+      If LSTM predicts words as in language modelling, input and output params can be shared. Useful on small datasets that do not allow large number of params.
+***** Gradient norm clipping
+      Rather than clipping each gradient independently, clipping the global norm of the gradient yields more significant improvements.
+***** Down-projection
+      To reduce num of output params, the hidden state of LSTM can be projected to smaller size.
+*** Task-specific best practices
+***** Classification
+      CNNs have been popular for classification tasks in NLP.
+      - *CNN filters*. Combining filter sizes near the optimal filter size (3,4,5). The optimal num of feature maps is in range 50-600.
+      - *Aggregation function*. 1-max-pooling outperforms average-pooling and k-max pooling
+***** TODO Sequence labelling
+      - *Tagging scheme*
+      - *CRF output layer*
+
+** TODO PoS tagging
+** Libraries
+**** Ktext
+     ktext performs common pre-processing steps associated with deep learning (cleaning, tokenization, padding, truncation). 
+     [[./https://github.com/hamelsmu/ktext]]
+** References
+    - [[http://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/][word2vec tutorial-skip gram]]
+    - [[http://mccormickml.com/2017/01/11/word2vec-tutorial-part-2-negative-sampling/][negative_sampling word2vec]]
+    - [[https://www.quora.com/How-is-GloVe-different-from-word2vec][How is Glove different from word2vec]]
+    - [[https://www.kdnuggets.com/2018/04/implementing-deep-learning-methods-feature-engineering-text-data-glove.html][Glove]]
+    - [[http://web.stanford.edu/class/cs224n/syllabus.html][Stanford CS224n: Natural Language Processing with deep learning]]
+    - [[https://www.quora.com/What-is-the-main-difference-between-word2vec-and-fastText][Difference between word2vec and fastText]]
+    - [[https://nathanrooy.github.io/posts/2018-03-22/word2vec-from-scratch-with-python-and-numpy/]]
+    - https://towardsdatascience.com/implementing-word2vec-in-pytorch-skip-gram-model-e6bae040d2fb
+    - [[http://blog.aylien.com/a-review-of-the-recent-history-of-natural-language-processing/?utm_medium=email&utm_source=topic+optin&utm_campaign=awareness&utm_content=20181015+ai+nl&mkt_tok=eyJpIjoiWlRGaFpEazJPR1ZtWWpCaCIsInQiOiJVR0FON0JuTWFmRU9rUnczb1NWS1hFR1dFbkh2S3dSdlJlZ3NwZ1FkN1VUQUVMbU5nM2hQTUhKNkczakdQYjlRUnQ2c2NWUnFhbWxkZVBpTDdnMFRNTmQ1aGpJOGdDaUQ0RW02R2wyQzc1YnVJTjFhNThaMzZWdjE1WUk3ZUtxNyJ9#2013neuralnetworksfornlp][Review of recent history of nlp]]
+    - [[http://ruder.io/deep-learning-nlp-best-practices/index.html][Deep learning best practices]]
+    - [[http://www.wildml.com/2015/11/understanding-convolutional-neural-networks-for-nlp/][Understanding CCN for NLP]]
+

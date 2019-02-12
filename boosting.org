@@ -1,0 +1,142 @@
+* Boosting
+  Family of algorithms that convert collection of weak learners to strong learners
+  - using avg/weighted avg
+  - considering precision has higher vote
+  in boosting methods, base estimators are built sequentially and one tries to reduce the bias of the combined estimator. Each model that runs, dictates what features the next model will focus on. The motivation is to combine several weak models to produce a powerful ensemble.
+
+  Unlike bagging, boosting weights each sample of data. This means some samples will be run more often than others. For each model, track which data samples are the most succesful and which are not. The data sets with the most misclassified outputs are given heavier weights. These are considered to be data that have more complexity and requires more iterations to properly train the model.
+
+  The model's error rates are kept track of because better models are given better weights. During classification, the models with better outcomes have a stronger pull on the final output.
+
+  It’s really important to note that boosting is focused on reducing the bias. This makes the boosting algorithms prone to overfitting. Thus, parameter tuning becomes a crucial part of boosting algorithms to make them avoid overfitting.
+
+** Basic Procedure
+   1. Start with set of classifiers h_1, ..., h_k
+   2. Create a classifier that combines classification functions f(x) = sgn \sum^T \alpha_{t}h_{t}(x)
+      - Goal is to minimize error (on training set)
+      - Iterative, select one h at each step
+      - Calculate weights based on errors
+      - Upweight missed classifications and select next h
+   Boosting pays higher focus on examples which are miss-classified or have higher errors by preceding weak rules. Place the most weight on the examples most often missclassified by the preceding weak rules; this has the effect of forcing the base learner to focus its attention on the "hardest" examples.
+
+** AdaBoost (Adaptive Boosting)
+   Fits sequence of weak learners on diff weighted training data. Starts predicting original data set and gives equal w to each observation. If pred is incorrect using fst learner, then it gives higher weight to observation which have been predicted incorrectly. Continues to add learners iteratively until a limit is reached in the num of models or accuracy.
+   Mostly uses decision stamps, but can use any machine learning algorithm as base learner if it accepts weight on trainind dataset.
+   
+   #+ATTR_ORG: :width 500
+   [[./ml_images/adaboost.png]]
+
+  - AdaBoost is adaptive in the sense that subsequent weak learners are tweaked in favor of those instances misclassified by previous classifiers. 
+  - AdaBoost is sensitive to noisy data and outliers. In some problems it can be less susceptible to the overfitting problem than other learning algorithms. 
+  - The individual learners can be weak, but as long as the performance of each one is slightly better than random guessing, the final model can be proven to converge to a strong learner.
+  - AdaBoost (with decision trees as the weak learners) is often referred to as the best out-of-the-box classifier.When used with decision tree learning, information gathered at each stage of the AdaBoost algorithm about the relative 'hardness' of each training sample is fed into the tree growing algorithm such that later trees tend to focus on harder-to-classify examples.
+  - the AdaBoost training process selects only those features known to improve the predictive power of the model, reducing dimensionality and potentially improving execution time as irrelevant features need not be computed.
+
+  The core principle of AdaBoost is to fit a sequence of weak learners (i.e., models that are only slightly better than random guessing, such as small decision trees) on repeatedly modified versions of the data. The predictions from all of them are then combined through a weighted majority vote (or sum) to produce the final prediction. The data modifications at each so-called boosting iteration consist of applying weights w_1, w_2, …, w_N to each of the training samples. Initially, those weights are all set to w_i = 1/N, so that the first step simply trains a weak learner on the original data. For each successive iteration, the sample weights are individually modified and the learning algorithm is reapplied to the reweighted data. At a given step, those training examples that were incorrectly predicted by the boosted model induced at the previous step have their weights increased, whereas the weights are decreased for those that were predicted correctly. As iterations proceed, examples that are difficult to predict receive ever-increasing influence. Each subsequent weak learner is thereby forced to concentrate on the examples that are missed by the previous ones in the sequence
+
+  - The main parameters to tune to obtain good results are n_estimators and the complexity of the base estimators (e.g., its depth max_depth or minimum required number of samples at a leaf min_samples_leaf in case of decision trees).
+  - Boosting seems to be susceptible to noise.
+  - Ability to find outliers.  Because AdaBoost focuses its weight on the hardest examples, the examples with the highest weight often turn out to be outliers.
+  - When the number of outliers is very large, the emphasis placed on the hard examples can become detrimental to the performance of AdaBoost.
+    - Alternatives to handle outliers : *Gentle Adaboost, BrownBoost*
+** Gradient Boosting
+   trains many model sequentially. Each new model gradually minimizes the loss function (y = ax + b + e, e needs special attention as it is an error term) of the whole system using Gradient Descent method. The learning procedure consecutively fit new models to provide a more accurate estimate of the response variable.
+
+   The principle idea behind this algorithm is to construct new base learners which can be maximally correlated with negative gradient of the loss function, associated with the whole ensemble.  
+   
+   A very thorough explanation can be seen in  [[http://explained.ai/gradient-boosting/index.html][How to explain gradient boosting]]
+
+*** Steps to fit Gradient Boosting
+    1. Fit simple model on data (linear regressor or decision tree).
+    2. Calculate error residuals. Actual target minus predicted target value. *[e1 = y - yPredicted1 ]*
+    3. Fit a new model on error residuals as target variable with same input variables. *[e1_predicted]*
+    4. Add the predicted residuals to the previous predictions
+       *[y_pred2 = y_pred1 + e1_pred]*
+    5. Fit another model on residuals that is still left. And repeat steps 2 to 5 until it starts overfitting or the sum of residuals become constant.
+       
+   The advantages of GBRT are:
+   - Natural handling of data of mixed type (= heterogeneous features)
+   - Predictive power
+   - Robustness to outliers in output space (via robust loss functions) If training using Mean Absolute error(MAE) instead of MSE.
+
+   The disadvantages of GBRT are: Scalability, due to the sequential nature of boosting it can hardly be parallelized.
+
+   - n_estimators: number of weak learners
+   - learning_rate: Contribution of weak learners in the final combination. Trade-off between learning_rate and n_estimators. This "shrinkage" is to reduce overfitting. Reduces influece of each individual tree and leaves space for future trees to improve the model".
+   - max_depth: maximum depth of individual estimators.
+   - subsample: Fraction of observations to be selected for each tree. Slightly less than 1 (0.8) make the model robust by reducing variance.
+  
+
+   - In the paper is recommended a low learning rate like 0.1 and a large number of stages(estimators). In practice, perform a grid search.
+
+   - Smaller values of learning_rate require larger numbers of weak learners to maintain a constant training error. Empirical evidence suggests that small values of learning_rate favor better test error.Recommend to set the learning rate to a small constant (e.g. learning_rate <= 0.1) and choose n_estimators by early stopping
+
+
+** XGBoost Xtreme Gradient Boosting
+   - Regularization: Standard GBM has no regularization.
+   - Efficient: Automatic parallel computation on a single machine. Can be run on a cluster
+   - Flexible: Allows to define custom optimization objectives and evaluation criteria.
+   - Handling missin values
+   - Tree pruning: make splits upto the max_depth specified and the start pruning tree backwards and removes splits beyond which there is no positive gain.
+   - Accuracy: Good result for most data sets.
+   - Built-in CV: Run cv at each iteration of the boosting process and this it is easy to get the exact optimum num of boosting iterations in a single run
+   - Continue on Existing model: from it last iteration of previous run.
+   - Calculate and plot the variable importance
+
+*** Params
+    1. General Params: Guide overall functioning
+       - num of threads: max by default
+       - booster: gbtree(default), gblinear
+    2. Booster params: Guide individual booster at each step
+       - *eta (learning rate)*: typical values: 0.01-0.2 (default=0.3)
+       - *min_child_weight (def=1)*: min sum of weights of all observations required in a child. Used to control overfitting. Higher vals prevent a model from learning relations which might be highly specific to the particular sample selected for a tree. Tuned using CV.
+       - *max depth def=6*: Higher depth allow model to learn relations very specific. Typical vals: 3-10
+       - *max_leaf_nodes*: Max num of terminal nodes. Can be defined in place of max_depth.
+       - *gamma def=0*: Specifies minimum loss reduction required to make a split. Makes algo conservative. Vary depending on the loss func and should be tuned.
+       - *max_delta-step def=0*: Usually not needed, but might help in log regression when class is extremely imbalanced.
+       - *subsample(def=1)*: Typical vals 0.5-1
+       - *colsample_by_tree def=1*: Similar to max_features in GBM. 0.5-1
+       - *colsample_bylevel def=1*: Subsample ration of columns for each split, in each level.
+       - *lambda def=1*: L2 reg term on weights. It should be explored to reduce overfitting.
+       - *alpha def=0*: L1 reg on weight (analogous to Lasso regression). Can be used in case of very high dims so that alg. runs faster.
+       - *scale_pos_weight def=1*: Value greater than 0 should be used in case of high class imbalance, to converge faster.
+    3. Learning Task params: guide the optimization performed
+       - *Objective (def=reg:linear)*: loss function to be minimized.
+         - *binary:logistic*: For binary classification. Returns probs.
+         - *multi-softmax*: multiclass classification.
+         - *multi-softprob*: like softmax but returns probs.
+       - Evaluation metric: (rmse, mae, logloss, error, merror, mloglogss, auc) Default accorindg to objective.
+       - Seed: random seed.
+     
+    Can group them as:
+    - Controlling complexity: *max-depth, min-child-weight, gamma*
+    - Robust to noise: *subsample, colsample-bytree*
+    
+    Sometimes data is imbalanced among classes.
+    - Only care about the ranking order
+      - Balance the positive and negative  weights, by *scale-pos-weight*
+      - Use "auc" as the evaluation metric.
+    - Care about predicting the right probability
+      - Cannot re-balance the dataset
+      - Set *max-delta-step* to finite num (1) will help convergence.
+    
+    Xgboost module in python has sklearn wrapper XGBClassifier. n_estimators exists here, for the standard implementation: num_boosting_rounds while calling the fit function.
+    
+    - Use *early.stop.round* to detect continuously being worse on test set.
+    - If overfitting, reduce stepsize *eta* and increase *nround* at the same time
+
+** TODO LightGBM
+
+
+** TODO CatBoost
+
+** References
+ - http://scikit-learn.org/stable/modules/ensemble.html#ensemble
+ - https://mlwave.com/kaggle-ensembling-guide/
+ - https://arxiv.org/abs/1603.02754 - xgboost paper
+ - [[https://hackernoon.com/how-to-develop-a-robust-algorithm-c38e08f32201][Boosting and Bagging]]
+ - [[http://explained.ai/gradient-boosting/index.html][How to explain gradient boosting]]
+ - [[https://medium.com/mlreview/gradient-boosting-from-scratch-1e317ae4587d][Gradient Boosting from scratch]]
+ - [[https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/][Guide to param tuning XGBoost]]
+ - [[https://www.analyticsvidhya.com/blog/2016/02/complete-guide-parameter-tuning-gradient-boosting-gbm-python/][Tuning params GBM]]
+ - [[https://towardsdatascience.com/catboost-vs-light-gbm-vs-xgboost-5f93620723db][Catboost vs lightgbm vs xgboost]]

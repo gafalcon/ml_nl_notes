@@ -1,0 +1,88 @@
+* Data Exploration
+ - Analysis of the features
+ - Finding relations or trends considering multiple features
+
+** Causation and Lurking Variables 
+   - A *lurking variable* is a variable that was not included in your analysis, but could change your interpretation of the data if it were included.
+   - Association does not cause causation.
+   - Including a lurking var in our exploration may:
+     - helps us to gain a deeper understanding of the relationship between vars, or 
+     - lead us to rethink the direction of an association
+   - Whenever including a lurking variable causes us to rethink the directio of an association, this is an instance of *Simpson's paradox*
+     
+** python pandas
+   - data.describe()
+   - data.head()
+   - data.isnull().sum() # total null vals
+   - data.groupby(['Sex','Survived'])['Survived'].count() # For cat features
+   - pd.crosstab(data.Pclass,data.Survived,margins=True).style.background_gradient(cmap='summer_r') # Cat/Ordinal features matrix
+   - data.corr() # Correlation matrix
+   - data.value_counts() #for cat
+
+** R
+   - summary() # min, max, quartiles, mean, ...
+   - table() # Frequencies
+   - prop.table() # Frequency table of conditional proportions
+   - hist(bins=, labels=) #Histogram
+   - pie(frequencies) # pie chart
+   - plot(x,y) #Scatterplot
+   - cor(x,y) #Correlation
+   - L = lm(x,y) # Regression coef(L) # coefficients abline(L)#draw line in plot
+
+** Visualization
+   - f,ax=plt.subplots(1,2,figsize=(18,8)) # Subplots
+   - df.plot.scatter(x,y)
+   - sns.countplot() # Bar chart for categorical data
+   - sns.countplot(hue='other cat') # to see relation in cat features
+     [[./ml_images/countplot.png]]
+   - data['Sex','Survived'].groupby(['Sex']).mean().plot.bar(ax=ax[0]) #ratio
+     [[./ml_images/pd_plot_ratio.png]]
+   - sns.factorplot('Pclass','Survived',hue='Sex',data=data) # makes separation of cat values easy
+     [[./ml_images/factorplot.png]]
+   - sns.factorplot('Pclass','Survived',hue='Sex',col='Embarked',data=data) #cat vs num in subplots
+     [[./ml_images/factorplot2.png]]
+   - sns.violinplot("Pclass","Age", hue="Survived", data=data,split=True,ax=ax[0]) #cat vs num
+     #+ATTR_ORG: :width 500
+     [[./ml_images/violinplot.png]]
+   - sns.barplot('SibSp','Survived',data=data,ax=ax[0]) #cat/ordinal vs cat count
+     #+ATTR_ORG: :width 500
+     [[./ml_images/barplot.png]]
+   - sns.distplot(data[data['Pclass']==1].Fare,ax=ax[0]) # num values
+     #+ATTR_ORG: :width 500
+     [[./ml_images/distplot.png]]
+   - sns.heatmap(data.corr(),annot=True,cmap='RdYlGn',linewidths=0.2) #Correlation heatmap
+     #+ATTR_ORG: :width 500
+     [[./ml_images/heatmap_corr.png]]
+
+* Feature engineering
+** TODO Filling missing vals
+   - data.fillna() #with mean(), median(), mode()[0], etc
+   - sklearn.preprocessing.Imputer
+   - imputation #TODO
+** Binning
+   - pd.qcut()
+   - pd.cut()
+** Scaling
+   - sklearn.preprocessing.StandardScaler
+** Categorical to One-hot encoding 
+   - to not impose ordering in the categories. Take notice if u need ordering in a feature.
+   - Some ml dont need it: DecisionTrees and derivates
+   - pd.get_dummies()
+   - sklearn.preprocessing.OneHotEncoder
+   - if large number of diff categories, use dimensionality reduction or one vs rest
+     - one-hot encode the most frequent ones and drop or encode the rest as being the same
+     - hashing trick
+   - Can help select specific categories in a feature. And remove the unimportant ones
+** Drop columns
+   - data.drop([cols], axis=1, inplace=True)
+   - if features strongly correlated, drop one. Rank correlation (Spearman) can help check non linear correlations
+   - Delete columns one at the time and check the score to see if there is any major difference when droping them
+*** Cluster analysis
+    To remove redundant features. See fastai ml notebook: lesson2-rf-interpretation
+** Combine columns 
+** Skewed data
+   - scipy.stats.skew : If > 0.75, transform.
+   - transform scipy.stats.boxcox
+   - transform np.log1p
+   - np.expm1 - inverse of log1p
+   - *Transform the dependent variable:* to fit better the assumptions underlying regression. To make the relations between vars *more linear*
