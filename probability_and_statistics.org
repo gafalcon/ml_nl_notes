@@ -1,0 +1,31 @@
+
+* Probability
+  
+** Events, sample spaces
+   - *Event*: something that occurs. Every event has one or more possible outcomes.
+   - *Experiment*: Process of taking a measurement or making an observation
+   - *Sample space*: List of all possible outcomes of an experiment/experiment.
+  
+** Probability properties
+   - probability always between 0 and 1.
+   - The probability of all possible outcomes of an event add up to 1.
+   - *Classical Probability*: the ratio of the num of cases favorable to an event to the number of all outcomes possible, where each of the outcomes is equally likely
+ 
+** Conditional Probability
+   - If A and B are two events, the probability of A occurring, given that B has occurred, is called *conditional probability*. P(A|B)
+   P(A|B) = P(A\cap{}B)/P(B)
+   - If a probability is based on a single variable, it is a *marginal probability*. The probability of outcomes for two or more variables is called a *joint probability*. We can compute marginal probabilities using joint probabilities in simple cases. P(A) = P(A and B) + P(A and not B)
+   - Event B is said to be *independent* of A if P(B|A) = P(B).
+   - P(A and B) = P(A) x P(B) if A and B are independent
+   - P(A\cap{}B) = P(A)*P(B|A) = P(B)*P(A|B)
+
+** Bayes' Theorem
+   Consider the following probability for variable 1 and variable 2:
+   P(outcome A_1 of variable 1 | outcome B of variable 2)
+   Bayes' Theorem states that this conditional probability can be identified as the following fraction:
+
+   P(B|A_1)P(A_1) / P(B|A_1)P(A_1) + P(B|A_2)P(A_2) + ... + P(B|A_k)P(A_k)
+
+   where A_2, A_3, ..., and A_k represent all other possible outcomes of the first variable.
+   - The numerator identifies the probability of getting both A_1 and B.
+   - The denominator is the overall probability of getting B.

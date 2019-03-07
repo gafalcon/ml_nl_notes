@@ -9,7 +9,10 @@
      - helps us to gain a deeper understanding of the relationship between vars, or 
      - lead us to rethink the direction of an association
    - Whenever including a lurking variable causes us to rethink the directio of an association, this is an instance of *Simpson's paradox*
-     
+
+** Recommendations     
+   - Check distribution of every variable of interest. if Normal, use mean and std, if skewed median and iqr
+
 ** python pandas
    - data.describe()
    - data.head()
@@ -19,17 +22,7 @@
    - data.corr() # Correlation matrix
    - data.value_counts() #for cat
 
-** R
-   - summary() # min, max, quartiles, mean, ...
-   - table() # Frequencies
-   - prop.table() # Frequency table of conditional proportions
-   - hist(bins=, labels=) #Histogram
-   - pie(frequencies) # pie chart
-   - plot(x,y) #Scatterplot
-   - cor(x,y) #Correlation
-   - L = lm(x,y) # Regression coef(L) # coefficients abline(L)#draw line in plot
-
-** Visualization
+*** Visualization
    - f,ax=plt.subplots(1,2,figsize=(18,8)) # Subplots
    - df.plot.scatter(x,y)
    - sns.countplot() # Bar chart for categorical data
@@ -53,6 +46,32 @@
    - sns.heatmap(data.corr(),annot=True,cmap='RdYlGn',linewidths=0.2) #Correlation heatmap
      #+ATTR_ORG: :width 500
      [[./ml_images/heatmap_corr.png]]
+
+
+** R
+   - summary() # min, max, quartiles, mean, ...
+   - table(col) # Frequencies
+   - table(col1, col2) #Creates contingency table
+   - prop.table(table, margin) # Frequency table of conditional proportions, margin = 1 (row), margin=2, (column)
+   - hist(bins=, labels=) #Histogram
+   - plot(animals$Sex, main="Bar Chart of Animal Genders", xlab="Animal Gender", ylab="Frequency")#Freq of cat variable
+   - pie(frequencies) # pie chart
+   - plot(x,y) #Scatterplot
+   - cor(x,y) #Correlation
+   - cor(dataframe) #Correlation matrix
+   - L = lm(y~x) # Regression coef(L) # coefficients abline(L)#draw line in plot
+   - boxplot(col)
+   - barplot(contingency_table, legend=T)
+     #+ATTR_ORG: :width 200
+     [[./imgs/stats/stacked_barplot.png]]
+   - barplot(gtab2, legend=T, beside=T, main="Gender by Grammy Winner", ylab="Counts", xlab = "Gender") #Beside
+     #+ATTR_ORG: :width 200
+     [[./imgs/stats/barplot_beside.png]]
+   - barplot(prop.table(gtab2,2)) #Relative frequencies
+     #+ATTR_ORG: :width 200
+     [[./imgs/stats/barplot_frequency.png]]
+
+ 
 
 * Feature engineering
 ** TODO Filling missing vals
