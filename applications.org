@@ -1,0 +1,11 @@
+* Vision
+** Style Transfer
+   - An explanation of style transfer. It trains an image to have tha same content of a C image and the same style of a C image. 
+   [[https://shafeentejani.github.io/2016-12-27/style-transfer/]]
+   - [[https://medium.com/tensorflow/neural-style-transfer-creating-art-with-deep-learning-using-tf-keras-and-eager-execution-7d541ac31398][good collab notebook implementation]]
+   - Style transfer in real time. Train a network to learn how to transfer style of a fixed image into any image you input.
+     [[https://shafeentejani.github.io/2017-01-03/fast-style-transfer/]]
+     Implementations: [[https://github.com/ShafeenTejani/fast-style-transfer]] [[https://github.com/lengstrom/fast-style-transfer]]
+   - Examples: [[http://genekogan.com/works/style-transfer/]]
+* NLP
+  - 
