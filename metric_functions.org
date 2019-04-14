@@ -13,6 +13,8 @@
 
     One important distinction between MAE & RMSE is that minimizing the squared error over a set of numbers results in finding its mean, and minimizing the absolute error results in finding its median. This is the reason why MAE is robust to outliers whereas RMSE is not.
 *** R^2 and adjusted R^2
+    In R-squared we have a baseline model which doesnt make use of any independent variables to predict the value of dependent variable Y. Instead it uses the mean of the observed responses of dependent variable Y and always predicts this mean as the value of Y. Any regression model that we fit is compared to this baseline model to understand it's goodness of fit.
+
     Explains how well your selected independent variable(s) explain the variability in your dependent variable(s).
     [[./imgs/metrics/r_square.png]]
     The numerator is MSE ( average of the squares of the residuals) and the denominator is the variance in Y values. Higher the MSE, smaller the R_squared and poorer is the model.

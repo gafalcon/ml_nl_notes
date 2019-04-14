@@ -24,6 +24,8 @@
 
 *** Visualization
    - f,ax=plt.subplots(1,2,figsize=(18,8)) # Subplots
+     plt.plot(.., ax[0][0])
+     plt.plot(.., ax[0][1])
    - df.plot.scatter(x,y)
    - sns.countplot() # Bar chart for categorical data
    - sns.countplot(hue='other cat') # to see relation in cat features

@@ -1,6 +1,5 @@
 
 * Probability
-  
 ** Events, sample spaces
    - *Event*: something that occurs. Every event has one or more possible outcomes.
    - *Experiment*: Process of taking a measurement or making an observation
