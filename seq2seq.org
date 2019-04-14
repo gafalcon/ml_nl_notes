@@ -48,6 +48,22 @@ During the preprocessing we do the following:
 
    Each hidden state in the encoder encodes information about the local context in that part of the sentence. As data flows from word 0 to word n, this local context information gets diluted. This makes it necessary for the decoder to peak through the encoder, to know the local contexts. Different parts of input sequence contain information necessary for generating different parts of the output sequence. In other words, each word in the output sequence is aligned to different parts of the input sequence. The alignment model gives us a measure of how well the output at position i match with inputs at around postion j. Based on which, we take a weighted sum of the input contexts (hidden states) to generate each word in the ouput sequence.
 
+   [[./imgs/nlp/attention_weighted.png]]
+
+*** Steps for calculating attention decoder
+    There are different methods for implementing the Attention Mechanism.
+
+    1. Compute a score for each hidden state of the encoder. To do this, we can use a linear neural layer, the inputs are the hidden states of the encoder, and the previous hidden state h_{t-1} of the decoder.
+    2. Normalize the scores using softmax. This way it creates a probability distribution.
+    3. Multiply the softmax scores with the encoder hidden states. Then sum up these weighted vectors to create the *context vector* c.
+    4.a. The context vector *c* is concatenated with the input vector to the RNN, and this is fed along with h_{t-1} to the RNN, the output of the RNN is then used to calculate the predicted output. [fn:1]
+    [[./imgs/nlp/attention_a.png]]
+    4.b. Another option is to first fed the RNN with its inputs to obtain a new hidden state h_t and an output. The output is discarded and the h_t is used in the attention mechanism to calculate *c*. The context vector c and the hidden state h_t are concatenated and fed to a feedforward nn and softmax to calculate the predicted next word.[fn:3] 
+    [[./imgs/nlp/attention_b.png]]
+    4.c. Another option is to only use the input of the RNN and h_{t-1} in the attention mechanism to calculate the context vector *c*. This are combined and passed as input to the RNN.[fn:2] 
+    [[./imgs/nlp/attention_c.png]]
+    
+    
 ** Examples
    - [[https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html]]
    - [[https://towardsdatascience.com/seq2seq-model-in-tensorflow-ec0c557e560f][tensorflow implementation of seq2seq]]
@@ -56,3 +72,10 @@ During the preprocessing we do the following:
 - http://complx.me/2016-06-28-easy-seq2seq/
 - https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html
 
+* Footnotes
+
+[fn:1]  [[https://guillaumegenthial.github.io/sequence-to-sequence.html][Seq2Seq with Attention and Beam Search]]
+
+[fn:3]  [[https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/][Attention explanation]]
+
+[fn:2]  [[https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html#the-seq2seq-model][Attention in Pytorch. C type]]

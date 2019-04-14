@@ -155,11 +155,12 @@
     - Prepend special start and end tokens to each sentence.
     - Tokenize
     - remove infrequent words
-** Augmented RNNs
+** TODO Augmented RNNs
 *** Neural Turing Machines
 *** Attentional Interfaces
 *** Adaptive Computation Time
 *** Neural Programmer
+*** TODO Bidirectional recurrent networks
 *** [[https://distill.pub/2016/augmented-rnns/]]
 
 ** References
