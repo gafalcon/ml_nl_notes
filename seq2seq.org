@@ -69,6 +69,11 @@ During the preprocessing we do the following:
     
 *** More on Attention
     [[https://medium.com/@Alibaba_Cloud/self-attention-mechanisms-in-natural-language-processing-9f28315ff905][self-attention mechanisms in natural language processing]]
+
+** Transformer Network
+   - [[http://jalammar.github.io/illustrated-transformer/][The Illustrated Transformer]] Great Visual explanation of the transformer architecture, self-attention and multihead-attention
+   - [[http://nlp.seas.harvard.edu/2018/04/03/attention.html][Attention is All you Need]] Pytorch implementation of the transformer network.
+   - [[https://medium.com/inside-machine-learning/what-is-a-transformer-d07dd1fbec04][What is a transformer]] Another explanation
 ** Examples
    - [[https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html]]
    - [[https://towardsdatascience.com/seq2seq-model-in-tensorflow-ec0c557e560f][tensorflow implementation of seq2seq]]
