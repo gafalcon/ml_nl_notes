@@ -67,6 +67,8 @@ During the preprocessing we do the following:
     [[./imgs/nlp/attention_c.png]]
     
     
+*** More on Attention
+    [[https://medium.com/@Alibaba_Cloud/self-attention-mechanisms-in-natural-language-processing-9f28315ff905][self-attention mechanisms in natural language processing]]
 ** Examples
    - [[https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html]]
    - [[https://towardsdatascience.com/seq2seq-model-in-tensorflow-ec0c557e560f][tensorflow implementation of seq2seq]]

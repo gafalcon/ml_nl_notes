@@ -56,7 +56,7 @@
    #+CAPTION: vanishing gradient
    [[./imgs/sigmoid_vanishing_gradient.png]]
    
-** TODO Long short-term memory units (LSTMs)
+** Long short-term memory units (LSTMs)
    LSTMs preserve the error backpropagated through time and layers. they allow recurrent nets to continue to learn over many time steps (over 1000), opening channel to link causes and effects remotely. 
 
    Contain info outside of normal flow in a gated cell. The cell makes decisions about what to store, when to allow reads, writes erasures, via gates that open and close.
@@ -139,7 +139,6 @@
     #+ATTR_ORG: :width 700
    [[./imgs/lstm_var_gru.png]] 
 
-*** TODO Bi-directional LSTMs
 *** Caracter-Level Language Models
     we’ll give the RNN a huge chunk of text and ask it to model the probability distribution of the next character in the sequence given a sequence of previous characters. This will then allow us to generate new text one character at a time.
 
@@ -155,12 +154,16 @@
     - Prepend special start and end tokens to each sentence.
     - Tokenize
     - remove infrequent words
-** TODO Augmented RNNs
+** Augmented RNNs
 *** Neural Turing Machines
 *** Attentional Interfaces
 *** Adaptive Computation Time
 *** Neural Programmer
-*** TODO Bidirectional recurrent networks
+*** Bidirectional recurrent networks
+    Two independent RNNs put together. The input sequence is fed in normal time order for one network, and in reverse time order for another. The outputs of the two networks are usually concatenated at each time step, other options are ...
+    This allows the nn to have both backward and forward information about the sequence at every time step. The returned outputs of bidirectional RNN at timestep t is the output after feeding input to bothe reverse and normal RNN unit a timestep t. (where normal RNN has seen inputs 1 ..t and reverse RNN has seen inputs t...n, n being the length of the sequence. 
+    The returned hidden state of bidirectional RNN is the hidden state after the whole seq is consumed. For normal RNN it's after timestep n; for reverse RNN it's after timestep 1.[fn:1] 
+    [[./imgs/nlp/bidirectional_rnn.png]]
 *** [[https://distill.pub/2016/augmented-rnns/]]
 
 ** References
@@ -168,5 +171,6 @@
    - http://karpathy.github.io/2015/05/21/rnn-effectiveness
    - [[https://colah.github.io/posts/2015-08-Understanding-LSTMs/]]
    - http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
-   
-     
+
+* Footnotes
+[fn:1] [[https://towardsdatascience.com/understanding-bidirectional-rnn-in-pytorch-5bd25a5dd66][Bidirectional RNNs]]
