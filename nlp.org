@@ -5,9 +5,13 @@
   - Tokenize text
   - Remove words not relevant, such as "@" or urls
   - Convert to lowercase
-  - Consider combining misspelled or alternately spelled words as single representation
-  - Lemmatize
+  - Consider combining misspelled or alternately spelled words as single representation (Normalization)
+  - Stemming. Reduce inflection in words to root form. (NLTK stemmers)
+  - Lemmatize (Remove inflections and map a word to its root form). It doesnt chop like stemming, but actually transforms the words. Could be much slower than a basic stemmer. Usually no significant impact on accuracy
+
+    If you have lot of well written text to work with in a fairly general domain, then preprocessing is not extremely critical; you can get away with the bare minimum (word embeddings). However, if a very narrow domain (e.g. Tweets about ...) and data is sparse and noisy, you could benefit from more preprocessing
 ** Word Representations
+
 *** Bag of words
     Completely ignores order of words
     #+ATTR_ORG: :width 500
@@ -182,7 +186,7 @@
     
 **** TODO Examples (CODE)
 
-** TODO Attention
+** Attention
     The main bottleneck of sequence-to-sequence learning is that it requires to compress the entire content of the source sequence into a fixed-size vector. Attention alleviates this by allowing the decoder to look back at the source sequence hidden states, which are then provided as a weighted average as additional input to the decoder
     
      #+ATTR_ORG: :width 300
@@ -190,6 +194,8 @@
     
     Attention is widely applicable and potentially useful for any task that requires making decisions based on certain parts of the input.
     Attention is also not restricted to just looking at the input sequence; self-attention can be used to look at the surrounding words in a sentence or document to obtain more contextually sensitive word representations. 
+    
+    To see more on attention [[./seq2seq.org]]
 **** TODO Examples (CODE)
      - https://www.kaggle.com/gafalcon/using-lstms-with-attention-for-emotion-recognition/notebook
 ** TODO Charnn
