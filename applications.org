@@ -8,4 +8,4 @@
      Implementations: [[https://github.com/ShafeenTejani/fast-style-transfer]] [[https://github.com/lengstrom/fast-style-transfer]]
    - Examples: [[http://genekogan.com/works/style-transfer/]]
 * NLP
-  - 
+  - Speech Recognition

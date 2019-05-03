@@ -28,6 +28,18 @@ it’s a method of evaluating how well your algorithm models your dataset. Most 
     [[./imgs/loss_funs/hinge_loss.png]]
 
     The (multi-class) hinge loss would recognize that the correct class score already exceeds the other scores by more than the margin, so it will invoke zero loss on both scores. Once the margins are satisfied, the SVM will no longer optimize the weights in an attempt to “do better” than it is already.
+
+** Others
+   
+*** CTC loss (Connectionist Temporal Classification)
+    Used to train deep neural networks in speech recognition, handwriting recognition and other sequence problems. [fn:1][fn:2] 
+    Connectionist Temporal Classification (CTC) is a way to get around not knowing the alignment between the input and the output sequences.
 ** References
    - [[http://rohanvarma.me/Loss-Functions/]]
    - https://ml-cheatsheet.readthedocs.io/en/latest/loss_functions.html
+
+* Footnotes
+
+[fn:2] [[https://gab41.lab41.org/speech-recognition-you-down-with-ctc-8d3b558943f0][Speech Recognition: You down with CTC?]]
+
+[fn:1] [[https://distill.pub/2017/ctc/][Sequence Modelling with CTC]]
