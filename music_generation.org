@@ -1,1 +1,46 @@
 * Music Generation using Deep Learning
+
+** Music Representation
+   
+*** Symbolic
+    Grand majority of research focused on this.
+**** MIDI (Musical Instrument Digital Interface)
+    MIDI itself does not make sound, it is just a series of messages like “note on,” “note off,” “note/pitch,” “pitch-bend,” and many more. These messages are interpreted by a MIDI instrument to produce sound.
+
+    A  drawback of MIDI is that it doesnt preserve the notion of notes being played at once through the use of multiple tracks
+**** ABC Notation[fn:1] 
+    [[./imgs/abc_notation.png]]
+    Two parts:
+    - Part1 is Metadata: tune index (X:), title (T), time signature (M:), default note length (L:), type of tune (R:) and the key (K:)
+    - Part2 is the sequence of musical notes
+    
+    In order to be processed by a dl architecture, it is usually transformed from a character vocabulary text into a token vocab text. A tune is enclosed within a <s> begin mark and an <\s> end mark. All melodies are also transposed to same C root base.
+**** Chord and Polyphony
+     Chords are usually encoded simultaneously as a vector.
+     *Chord2Vec:* Vectors are represented horizontally as sequences of constituent notes. Chords are separated by a special symbol, like the symbols used to separate sentences in nlp.
+**** Piano Roll
+     [[./imgs/piano_roll.png]]
+     The x represents the time and the y axis represents pitch. A drawback is that there is no note off information. There is no way to distinguish between a long note and a repeated short note.
+     Another similar representation is tabs, used my MidiNet system
+*** Audio
+**** Waveform
+     Raw audio signal. Demanding in terms of processing and memory
+**** Transformed Representations
+***** Spectrogram
+      Time vs Frequency representation. Third axis is intensity of sound.
+***** Chromagram
+      Variation of spectrogram, discretized onto the tempered scale and independent of the octave. It is restricted to pitch classes.
+** NN Models
+*** Examples 
+    - WaveNet
+    - MidiNet
+*** Many 2 Many RNN [fn:1]
+    [[./imgs/rnn_model_music.png]]
+    - BATCH SIZE = 16
+    - SEQ_LENGTH = 64
+    - Input Data: ABC Notation data from Jigs and Hornpipes
+    - LSTM: 256 units. return_sequences = True, to generate the entire output characters, not just the last one. stateful = True, then the last state for each sample at index ‘i’ in a batch will be used as initial state for the sample of index ‘i’ in the following batch. This is used because all of the batches contains rows in continuation. So, if we feed the last state of a batch as initial state in the next batch then our model will learn more longer sequences.
+    - TimeDistributed. applies a layer to every temporal slice of an input. Since the shape of each output after third LSTM layer is (16*64*256). We have 87 unique characters in our dataset and we want that the output at each time-stamp will be a next character in the sequence which is one of the 87 characters. So, time-distributed dense layer contains 87 “Softmax” activations and it creates a dense connection at each time-stamp. Finally, it will generate 87 dimensional output at each time-stamp which will be equivalent to 87 probability values. It helps us to maintain Many-to-Many relationship.
+* Footnotes
+
+[fn:1] https://medium.com/datadriveninvestor/music-generation-using-deep-learning-85010fb982e2
