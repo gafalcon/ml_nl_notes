@@ -160,11 +160,18 @@
 ***** advantage local fields
       We will connect each neuron to only a local region of the input volume. *Receptive field*. The connections are local in space(along width and height), but always full along the entire depth.
 ***** less number of weights
-***** TODO 1x1 convolution
+***** Receptive Field and stacking convolutions
+      Stacking convs one after the other increases the original receptive field: two (3,3) convs get to a (5,5) receptive field (Original input size that originates the output of the stacked convs).
+      Tend to perform better than a single (5,5) conv and with fewer params
 ***** dilation
-      filters that have spaces between each cell, called dilation. Useful in conjunction with 0-dilated filters cuz it allows you to merge spatial info across the inputs much more agressively with fewer layers.
+      Filters that have spaces between each cell, called dilation. These filters can "see" a greater portion of the image by skipping pixels
+      Useful in conjunction with 0-dilated filters cuz it allows you to merge spatial info across the inputs much more agressively with fewer layers.
      For example, if you stack two 3x3 CONV layers on top of each other then you can convince yourself that the neurons on the 2nd layer are a function of a 5x5 patch of the input. If we use dilated convolutions then this effective receptive field would grow much quicker. 
+     Stacking dilated convs quickly gets to larger receptive fields.
+    [[./imgs/dilated_conv.png]]
+
 **** Pooling layer
+     *** Recently fallen out of favor
      Reduce spatial size to reduce amount of params and computation, and hence control overfitting.
      The most commoon is a maxpooling of size 2x2 applied with stride of 2. The depth dimension remains unchanged.
      Other common F = 3, S = 2 (overlapping pooling). Larger receptive fields are too destructive.
@@ -177,6 +184,13 @@
 ***** Getting rid of pooling
       discard pooling in favor of repeated CONV layers. Suggest using larger stride in CONV layer once in a while.
       Important for training good generative models. (VAEs), (GANs)
+
+**** 1x1 convolution
+     Often called channel wise pooling, feature map pooling or projection layer. Used for dimensionality reduction
+     Reduce number of feature maps (depth dimension) of conv layers. 
+     Crucial for popular convnet architectures (Inception).
+     [[./imgs/1x1conv.png]]
+
 **** Fully-Connected layer
 **** ConvNet Architectures
 ***** Layer Patterns
@@ -415,5 +429,5 @@ But Xavier init is still good choice to init weights in your network.
     
     - [[https://towardsdatascience.com/deep-learning-tips-and-tricks-1ef708ec5f53][Tips and tricks]]
     - [[http://introtodeeplearning.com/][Intro Deep Learning MIT]]
-
-
+** Resources
+   - https://machinelearningmastery.com/introduction-to-1x1-convolutions-to-reduce-the-complexity-of-convolutional-neural-networks/
