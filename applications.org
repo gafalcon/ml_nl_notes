@@ -1,4 +1,63 @@
 * Vision
+** Localization 
+   Output single object's class and its location. Simply predict the bounding box coordinates as well as the class, using same network. Does not scale with multiple objects, cuz we don't know how many objects.
+
+    #+ATTR_ORG: :width 500
+   [[./imgs/cnn_localizaton_net.png]]
+** Detection
+   Output every object's class and location.
+   [[./imgs/cnn_detection.png]]
+   - Non NN solution: HOG features in each region and then SVM to classify
+   - 1st DL solution: slide classifier over img at multiple scales (Very expensive).
+*** Region proposal methods
+    Use regions to localize objects. Does not look at complete img, but at parts which have high probabilities fo containing the object.
+    - RCNN: Region CNN (2014): Use non deep learning method (Selective search) to find interesting regions in img, and then use AlexNet on each region (warped to square)
+      - Selective Search: Generate initial sub-segmentation, then use greedy algorithm to recursively combine similar regions into larger ones. Use generated regions to produce final candidate region proposals.
+      [[./imgs/rcnn.png]]
+    - Fast R-CNN. Instead of feeding region proposals to CNN, we feed the input img to generate convolutional feature map. From this, identify region of proposals and warp them into squares. By using a RoI pooling layer reshape them to fixed size to feed them to fully connected layer.
+      Now you dont have to feed ~2k region proposals to cnn every time, that's why is much faster, being the identification of region proposals the bottleneck.
+      [[./imgs/fast_rcnn.png]]
+    - Faster RCNN (2015)
+      Replaces selective search with small CNN (Region Proposal Network) to generate ROIs. The img is input to a CNN which creates convolutional feature map. A separate network is used to predict region proposals. These are reshaped using RoI pooling layer which is used for classification and predict offset values for bounding boxes.
+    #+ATTR_ORG: :width 400
+    [[./imgs/faster_cnn.png]]
+*** YOLO (You only Look Once) 2015
+    A single CNN predicts bounding boxes and the class probabilities for these boxes. Sees the complete img only once. Super fast.
+    Divides img into grid of SxS and each grid predicts N bounding boxes and confidence (prob of containing object). It also predicts the classification score for each box for every class in training.
+    In total SxSxN boxes are predicted. The boxes with confidence above a threshold are selected.
+    #+ATTR_ORG: :width 500
+    [[./imgs/yolo.jpeg]]
+**** IoU (Intersection over Union)
+     To decide prediction is correct. Intersection b/w predicted bbox and actual box divided by their union
+**** Non-max suppression
+     Get a single detection per object when more than one grid cell predicts the same object.
+     1. Discard bbox where p_c < threshold.
+     2. For remaining bbox:
+        2.1 Pick bbox with highest p_c (output)
+        2.2 Discard any remaining bbox with higher overlap IoU with output
+     Greedy approach, assumes the best scoring p_c is best fit for object, but not always true, it may also suppress nearby objects, and does not suppress false positives.
+**** Anchors
+     Allow multiple detections per grid cell. These are precalculated fixed bbox representing the approx bbox prediction. Each object is assigned to a grid cell than contains its midpoint, and anchor box of the grid cell with highest IoU.
+     With this the output label now has multiple predictions w.r.t anchor box.
+     #+ATTR_ORG: :width 300
+     [[./imgs/yolo_anchors.png]]
+*** SSD (Single Shot Detector)
+    Runs conv network on input img only once and calculates a feature map. Then run 3x3 conv kernel on this feature map to predict bounding boxes (regression problem: multibox) and classification probability.
+    Also uses anchor boxes at various aspect ratio and learns offset rather than learning the box. To handle scale, it predicts bounding boxes after multiple conv layers. Since each conv layer operates at a different scale, it's able to detect objects of various scales.
+    [[./imgs/ssd.png]]
+*** Comparison
+    [[./imgs/cnn_detection_acc.png]]
+    [[./imgs/cnn_detection_speed.png]]
+** Segmentation
+   Label every pixel in image as belonging to an object or to background
+   [[./imgs/cnn_segmentation.png]]
+   
+*** Mask R-CNN
+
+** 3D shape inference
+*** Mesh R-CNN
+** Pose Estimation
+** Face Landmark Recognition
 ** Style Transfer
    - An explanation of style transfer. It trains an image to have tha same content of a C image and the same style of a C image. 
    [[https://shafeentejani.github.io/2016-12-27/style-transfer/]]
@@ -7,5 +66,9 @@
      [[https://shafeentejani.github.io/2017-01-03/fast-style-transfer/]]
      Implementations: [[https://github.com/ShafeenTejani/fast-style-transfer]] [[https://github.com/lengstrom/fast-style-transfer]]
    - Examples: [[http://genekogan.com/works/style-transfer/]]
+** Resources
+   - https://towardsdatascience.com/r-cnn-fast-r-cnn-faster-r-cnn-yolo-object-detection-algorithms-36d53571365e
+   - https://kharshit.github.io/blog/2019/03/15/quick-intro-to-object-detection
+   - https://cv-tricks.com/object-detection/faster-r-cnn-yolo-ssd/
 * NLP
   - Speech Recognition
